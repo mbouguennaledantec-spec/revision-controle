@@ -36,6 +36,8 @@ input{width:100%;font:inherit;font-family:ui-monospace,Menlo,monospace;padding:1
 .lv{display:flex;gap:12px;align-items:center;text-align:left}
 .lv b{flex:1}
 ul{padding-left:20px;margin:.3em 0}
+.tb{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:18px}.tb button{padding:8px 14px;min-height:42px;font-size:15px}
+.hn{background:var(--card);border:2px dashed var(--ac);border-radius:12px;padding:8px 12px;margin:10px 0;font-size:15px}
 @media(prefers-reduced-motion:reduce){.bw i{transition:none}}
 </style></head><body><main>
 <div class="hd"><span>Mission Egnora</span><span id="tm">⏱ 00:00 / 60:00</span></div>
@@ -110,26 +112,36 @@ const save=()=>{try{localStorage.setItem(K,JSON.stringify(P))}catch(e){}};
 let V={v:"home"};const t0=Date.now();
 setInterval(()=>{const s=Math.floor((Date.now()-t0)/1e3),f=n=>String(n).padStart(2,"0");$("#tm").textContent="⏱ "+f(Math.floor(s/60))+":"+f(s%60)+" / 60:00"},1e3);
 const go=l=>{V={v:"play",l,st:0,i:0,e:0};R()};
-const nx=()=>{V.st++;V.i=0;V.m=null;V.o=null;V.msg=""};
+const nx=()=>{V.st++;V.i=0;V.m=null;V.o=null;V.msg="";V.hint=null;V.draft=""};
 function R(){const p=Math.round(P.d.length/D.length*100);$("#bar").style.width=p+"%";$("#pc").textContent=p+"%";scrollTo(0,0);
 if(V.v=="home")return H();if(V.v=="end")return F();if(V.v=="lv")return W();
 const d=D[V.l],h=`<div class="st">${["Leçon","Mémoire","QCM","Code"].map((s,i)=>`<span class="${i==V.st?"on":i<V.st?"ok":""}">${s}</span>`).join("")}</div><h2>${d.ic} ${d.t}</h2>`;
-[Les,Mem,Qcm,Cod][V.st](d,h)}
+if(V.rv!=null)return Rev(d);[Les,Mem,Qcm,Cod][V.st](d,h)}
 function H(){A.innerHTML=`<div class="card"><h2>Bienvenue, nouvel administrateur 👋</h2><p>L’entreprise <b>Egnora</b> est attaquée. Ta mission : comprendre comment protéger son système d’information, <b>en 1 heure</b>, même si tu pars de zéro.</p><p>Chaque niveau (≈10 min) : <b>Leçon</b> → <b>Mémoire</b> → <b>QCM</b> → <b>Code</b>.</p><p>Si tu te trompes, je t’explique ton erreur, mais je ne donne pas la solution : tu recommences. C’est comme ça qu’on retient.</p></div>`+D.map((d,i)=>{const o=i==0||P.d.includes(i-1)||P.d.includes(i);return`<button class="t lv" ${o?"":"disabled"} onclick="go(${i})"><span style="font-size:28px">${P.d.includes(i)?"✅":o?d.ic:"🔒"}</span><b>Niveau ${i+1} · ${d.t}</b><span>${"⭐".repeat(P.s[i]||0)}</span></button>`}).join("")+`<p class="m"><a href="#" onclick="if(confirm('Tout effacer ?')){P={d:[],s:{}};save();V={v:'home'};R()}return false" style="color:inherit">Tout recommencer</a></p>`}
 function Les(d,h){const c=d.L[V.i],l=V.i==d.L.length-1;A.innerHTML=h+`<div class="card"><h3>${c[0]}</h3><p>${c[1]}</p></div><div class="nav">${V.i?`<button class="g" onclick="V.i--;R()">Retour</button>`:`<button class="g" onclick="V={v:'home'};R()">Menu</button>`}<button onclick="${l?"nx()":"V.i++"};R()">${l?"À toi de jouer !":"Suivant"}</button></div><p class="m">Carte ${V.i+1}/${d.L.length}</p>`}
 function Mem(d,h){if(!V.m)V.m={o:sh(d.M.map((_,i)=>i)),s:null,k:[],msg:""};const m=V.m,b=(i,f,c)=>`<button class="t ${m.k.includes(i)?"ok":c}" ${m.k.includes(i)?"disabled":""} onclick="${f}(${i})">${f=="ms"?d.M[i][0]:d.M[i][1]}</button>`;
-A.innerHTML=h+`<p>Associe chaque terme à sa définition : touche un terme, puis sa définition.</p><div class="mm"><div>${d.M.map((_,i)=>b(i,"ms",m.s===i?"sel":"")).join("")}</div><div>${m.o.map(i=>b(i,"md","")).join("")}</div></div>${m.msg}`}
+A.innerHTML=h+`<p>Associe chaque terme à sa définition : touche un terme, puis sa définition.</p><div class="mm"><div>${d.M.map((_,i)=>b(i,"ms",m.s===i?"sel":"")).join("")}</div><div>${m.o.map(i=>b(i,"md","")).join("")}</div></div>${m.msg}${hn("m"+m.k.length)}${tb()}`}
 const ms=i=>{V.m.s=i;V.m.msg="";R()};
 function md(j){const m=V.m,d=D[V.l];if(m.s===null){m.msg=`<p class="ko">Choisis d’abord un terme à gauche.</p>`;return R()}
 if(m.s==j){m.k.push(j);m.s=null;m.msg=`<p class="yes">✅ Bien joué !</p>`;if(m.k.length==d.M.length)nx()}
 else{V.e++;m.msg=`<p class="ko">❌ Erreur : cette définition ne correspond pas à « ${d.M[m.s][0]} ». Repense à ce que fait vraiment ce terme, puis réessaie.</p>`;m.s=null}R()}
-function Qcm(d,h){const q=d.Q[V.i];if(!V.o)V.o=sh([[q[1]],...q[2]]);
-A.innerHTML=h+`<div class="card"><h3>Question ${V.i+1}/${d.Q.length}</h3><p>${q[0]}</p></div>${V.msg||""}${V.o.map((o,k)=>`<button class="t" onclick="qa(${k})">${o[0]}</button>`).join("")}`}
+function Qcm(d,h){const q=d.Q[V.i],hk=V.hint&&V.hint.k=="q"+V.i?V.hint.n:0,el=q[2].slice(0,hk);if(!V.o)V.o=sh([[q[1]],...q[2]]);
+A.innerHTML=h+`<div class="card"><h3>Question ${V.i+1}/${d.Q.length}</h3><p>${q[0]}</p></div>${V.msg||""}${el.map(e=>`<div class="hn">💡 Ce n’est pas « ${e[0]} » : ${e[1]}</div>`).join("")}${V.o.map((o,k)=>`<button class="t" ${el.some(e=>e[0]==o[0])?"disabled":""} onclick="qa(${k})">${o[0]}</button>`).join("")}${tb()}`}
 function qa(k){const o=V.o[k],d=D[V.l];if(o[1]){V.e++;V.msg=`<p class="ko">❌ ${o[1]} Réessaie.</p>`;V.o=sh(V.o)}
 else{V.o=null;V.msg=`<p class="yes">✅ Juste ! Question suivante.</p>`;if(V.i<d.Q.length-1)V.i++;else nx()}R()}
-function Cod(d,h){const c=d.C[V.i];A.innerHTML=h+`<div class="card"><h3>Code ${V.i+1}/${d.C.length}</h3><p>${c[0]}</p><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" onkeydown="event.key=='Enter'&&ck()"></div>${V.msg||""}<button onclick="ck()">Valider</button>`;$("#in").focus()}
-function ck(){const d=D[V.l],c=d.C[V.i],v=$("#in").value.trim().toLowerCase().replace(/\s+/g," ");
+function Cod(d,h){const c=d.C[V.i];A.innerHTML=h+`<div class="card"><h3>Code ${V.i+1}/${d.C.length}</h3><p>${c[0]}</p><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" onkeydown="event.key=='Enter'&&ck()"></div>${V.msg||""}${hn("c"+V.i)}<button onclick="ck()">Valider</button>${tb()}`;$("#in").value=V.draft||"";$("#in").focus()}
+function ck(){V.draft="";const d=D[V.l],c=d.C[V.i],v=$("#in").value.trim().toLowerCase().replace(/\s+/g," ");
 if(new RegExp("^("+c[1]+")$").test(v)){V.msg="";if(V.i<d.C.length-1)V.i++;else return fin()}else{V.e++;V.msg=`<p class="ko">❌ ${c[2]} Réessaie.</p>`}R()}
+const hn=k=>V.hint&&V.hint.k==k&&V.hint.t?`<div class="hn">💡 ${V.hint.t}</div>`:"";
+const tb=()=>`<div class="tb"><button class="g" onclick="hi()">💡 Indice</button><button class="g" onclick="rv()">📖 Revoir la leçon</button><button class="g" onclick="rs()">↺ Recommencer</button></div>`;
+const rs=()=>{if(confirm("Recommencer ce niveau depuis la leçon ?"))go(V.l)};
+function rv(){const i=$("#in");if(i)V.draft=i.value;V.rv=0;R()}
+function hi(){const d=D[V.l];
+if(V.st==1){const m=V.m,j=m.s!==null?m.s:d.M.findIndex((_,i)=>!m.k.includes(i));V.hint={k:"m"+m.k.length,t:`Pour « ${d.M[j][0]} », la définition commence par « ${d.M[j][1].split(" ").slice(0,3).join(" ")}… »`}}
+else if(V.st==2){const q=d.Q[V.i],k="q"+V.i,n=V.hint&&V.hint.k==k?V.hint.n:0;V.hint={k,n:Math.min(n+1,q[2].length-1)}}
+else if(V.st==3){const i=$("#in");if(i)V.draft=i.value;V.hint={k:"c"+V.i,t:d.C[V.i][2]}}
+R()}
+function Rev(d){const c=d.L[V.rv],l=V.rv==d.L.length-1;A.innerHTML=`<div class="st"><span class="on">📖 Révision de la leçon</span></div><h2>${d.ic} ${d.t}</h2><div class="card"><h3>${c[0]}</h3><p>${c[1]}</p></div><div class="nav"><button class="g" onclick="${V.rv?"V.rv--":"V.rv=null"};R()">${V.rv?"Retour":"Reprendre"}</button><button onclick="${l?"V.rv=null":"V.rv++"};R()">${l?"Reprendre l’exercice":"Suivant"}</button></div><p class="m">Carte ${V.rv+1}/${d.L.length}</p>`}
 function fin(){V.s=V.e==0?3:V.e<4?2:1;if(!P.d.includes(V.l))P.d.push(V.l);P.s[V.l]=Math.max(P.s[V.l]||0,V.s);save();V.v="lv";R()}
 function W(){const d=D[V.l],last=V.l==D.length-1;A.innerHTML=`<div class="card" style="text-align:center"><h2>🎉 Niveau réussi !</h2><p style="font-size:30px;margin:0">${"⭐".repeat(V.s)}</p><p>${V.e?V.e+" erreur(s) : tu as appris en te trompant, c’est le but.":"Sans aucune erreur, bravo !"}</p><p>Tu maîtrises : <b>${d.t}</b></p></div><div class="nav"><button class="g" onclick="V={v:'home'};R()">Menu</button><button onclick="${last?"V={v:'end'};R()":"go("+(V.l+1)+")"}">${last?"Terminer la mission":"Niveau suivant"}</button></div>`}
 function F(){A.innerHTML=`<div class="card"><h2>🏆 Mission accomplie !</h2><p>Le bouclier du SI est à 100 %. Fiche à relire avant le contrôle :</p><ul><li><b>DICP</b> : Disponibilité, Intégrité, Confidentialité, Preuve.</li><li><b>Risque</b> = Menace × Vulnérabilité × Impact ÷ Contre-mesures.</li><li><b>Sûreté</b> = accident ; <b>sécurité</b> = malveillance.</li><li><b>4 menaces</b> : déstabilisation, espionnage, sabotage, cybercriminalité.</li><li><b>4 étapes</b> : identifier, évaluer (EBIOS), réduire, surveiller.</li><li><b>PCA</b> = continuer ; <b>PRA</b> = reprendre après sinistre.</li><li><b>5 phases d’un malware</b> : infection, persistance, dissimulation, propagation, exfiltration.</li><li><b>Mot de passe</b> : force = N<sup>L</sup>, long, unique, double authentification.</li></ul></div><button onclick="V={v:'home'};R()">Retour au menu</button>`}
