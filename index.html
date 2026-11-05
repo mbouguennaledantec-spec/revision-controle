@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mission Egnora – Protéger le SI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3fb;--card:#fff;--ink:#14213d;--mut:#55627d;--ac:#0b6bcb;--on:#fff;--ok:#14855a;--ko:#c8245f;--line:#cfd9ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1a2e;--card:#17253f;--ink:#e8eefb;--mut:#9fb0d0;--ac:#5aa9ff;--on:#08172d;--ok:#3fd49b;--ko:#ff7aa5;--line:#2b3d5f}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1a2e;--card:#17253f;--ink:#e8eefb;--mut:#9fb0d0;--ac:#5aa9ff;--on:#08172d;--ok:#3fd49b;--ko:#ff7aa5;--line:#2b3d5f}
+*{box-sizing:border-box}html{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Bricolage Grotesque",system-ui,sans-serif}
+main{max-width:720px;margin:auto;padding:16px}
+.hd{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:20px}
+#tm{font-size:15px;color:var(--mut);font-weight:500}
+.sh{display:flex;align-items:center;gap:10px;margin:10px 0 18px;font-weight:800}
+.bw{flex:1;height:14px;border-radius:9px;background:var(--line);overflow:hidden}
+.bw i{display:block;height:100%;width:0;background:var(--ok);transition:width .6s}
+h2{font-size:26px;line-height:1.2;margin:.2em 0 .5em}h3{margin:.1em 0 .3em;font-size:19px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+.card p{margin:.3em 0}
+button{font:inherit;font-weight:800;cursor:pointer;border:2px solid var(--ac);background:var(--ac);color:var(--on);border-radius:12px;padding:10px 18px;min-height:46px}
+button.g{background:transparent;color:var(--ac)}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.t{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);font-weight:500;margin:8px 0;padding:10px 12px;font-size:16px}
+.t.sel{border-color:var(--ac);background:var(--line)}
+.t.ok{border-color:var(--ok);color:var(--ok)}
+.mm{display:grid;grid-template-columns:1fr 1.5fr;gap:10px}
+.nav{display:flex;gap:10px;justify-content:space-between;margin-top:10px}
+.st{display:flex;gap:6px;font-size:14px;margin-bottom:6px}
+.st span{flex:1;text-align:center;padding:4px;border-radius:8px;background:var(--line);color:var(--mut)}
+.st .on{background:var(--ac);color:var(--on);font-weight:800}.st .ok{background:var(--ok);color:var(--on)}
+.ko{color:var(--ko);font-weight:800;margin:10px 0}.yes{color:var(--ok);font-weight:800;margin:10px 0}
+.m{color:var(--mut);font-size:14px;text-align:center}
+input{width:100%;font:inherit;font-family:ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);margin:8px 0 4px}
+.lv{display:flex;gap:12px;align-items:center;text-align:left}
+.lv b{flex:1}
+ul{padding-left:20px;margin:.3em 0}
+@media(prefers-reduced-motion:reduce){.bw i{transition:none}}
+</style></head><body><main>
+<div class="hd"><span>Mission Egnora</span><span id="tm">⏱ 00:00 / 60:00</span></div>
+<div class="sh"><span>🛡️ Bouclier du SI</span><div class="bw"><i id="bar"></i></div><span id="pc">0%</span></div>
+<div id="a"></div></main>
+<script>
+const D=[
+{ic:"🛡️",t:"Pourquoi protéger le SI ?",
+L:[["Le SI, ta maison numérique","Le <b>système d’information (SI)</b>, ce sont les données, logiciels, ordinateurs et réseaux de l’entreprise. S’il tombe, tout s’arrête : en 2013, un bug à La Poste a bloqué virements et retraits pendant 24 h."],
+["Les impacts d’une cyberattaque","<b>Économique</b> (production arrêtée), <b>juridique</b> (procès pour données ou droit d’auteur) et <b>image</b> (e-réputation). Données perdues ou altérées, services indisponibles, informations divulguées… voire accidents physiques."],
+["La formule du risque","<b>Risque = (Menace × Vulnérabilité × Impact) ÷ Contre-mesures</b>. Plus la menace est forte, plus le risque monte. Plus tu mets de protections (pare-feu, sauvegardes, formation), plus il baisse."],
+["Sûreté ou sécurité ?","<b>Sûreté</b> = événement <u>accidentel</u> ou involontaire (incendie du datacenter OVH). <b>Sécurité</b> = acte <u>malveillant</u> (vol de données, intrusion, espion Pegasus)."],
+["DICP : les 4 objectifs","<b>D</b>isponibilité (ça marche), <b>I</b>ntégrité (rien n’est modifié), <b>C</b>onfidentialité (seuls les autorisés lisent), <b>P</b>reuve (non-répudiation : impossible de nier une action, grâce aux logs)."]],
+M:[["Disponibilité","Les ressources restent utilisables pour travailler"],["Intégrité","Aucune altération des informations, stockées ou transmises"],["Confidentialité","Seuls les tiers autorisés peuvent consulter l’information"],["Preuve","Non-répudiation : impossible de nier une opération (logs)"],["Sûreté","Prévenir les événements accidentels ou involontaires"]],
+Q:[["Un incendie accidentel détruit un datacenter. De quoi s’agit-il ?","Un problème de sûreté",[["Un problème de sécurité","La sécurité vise les actes malveillants ; ici, rien n’est volontaire."],["Un vol de confidentialité","Personne n’a lu de données : un accident les a détruites."],["De la cybercriminalité","Il faut un attaquant pour parler de cybercriminalité, or l’incendie est accidentel."]]],
+["Un pirate modifie les prix dans une base de données. Quel critère est touché ?","L’intégrité",[["La disponibilité","Les données restent accessibles : elles sont seulement modifiées."],["La confidentialité","Rien n’a été lu par un tiers : il s’agit d’une modification."],["La preuve","La preuve sert à savoir qui a fait quoi, pas à empêcher l’altération."]]]],
+C:[["Complète : Risque = (Menace × Vulnérabilité × Impact) ÷ ______ (2 mots, pluriel)","contre[- ]?mesures","Ce sont les protections mises en place (pare-feu, sauvegardes…). Écris-le avec un tiret."]]},
+{ic:"🎯",t:"Menaces et attaquants",
+L:[["4 grandes menaces (ANSSI)","<b>Déstabilisation</b> (déni de service, défiguration, divulgation), <b>espionnage</b> (point d’eau, spearfishing), <b>sabotage</b> (provoquer une panne) et <b>cybercriminalité</b> (rançongiciel, hameçonnage)."],
+["Menaces non intentionnelles","Relèvent de la <b>sûreté</b> : <b>accident naturel</b> (orage, inondation, feu), <b>erreur humaine</b> (maladresse, négligence) et <b>matériel</b> (un équipement bon marché peut être fragile)."],
+["Menaces intentionnelles","Relèvent de la <b>sécurité</b> : des personnes malveillantes, <b>internes</b> ou <b>externes</b>, plus ou moins dangereuses selon leurs compétences et leurs droits d’accès."],
+["3 profils d’attaquants","1) <b>Organisations structurées</b> (États, crime organisé) : gain, moyens énormes. 2) <b>Groupes idéologiques</b> (terroristes, activistes). 3) <b>Individus spécialisés</b> aux moyens limités."],
+["EBIOS : l’analyse de risques","Méthode <b>proactive</b> (on agit avant l’attaque) de l’ANSSI : elle évalue la criticité des actifs, les risques, les scénarios et leurs impacts. EBIOS = Expression des besoins et identification des objectifs de sécurité."]],
+M:[["Déni de service","Inonder un serveur de requêtes pour le rendre inaccessible"],["Défiguration","Remplacer les pages d’un site pour diffuser un message idéologique"],["Point d’eau","Infecter un site que la cible visite pour entrer dans son réseau"],["Rançongiciel","Données rendues inaccessibles jusqu’au paiement d’une rançon"],["Spearfishing","Mail ciblé usurpant une personne connue, avec pièce jointe piégée"]],
+Q:[["Des milliers de requêtes font tomber le site d’une mairie. Quelle attaque ?","Un déni de service",[["Une défiguration","Elle change le contenu du site ; ici le site est seulement inaccessible."],["Un rançongiciel","Aucune donnée n’est chiffrée et aucune rançon n’est demandée."],["Un point d’eau","Aucun site n’est piégé pour infecter ses visiteurs."]]],
+["Un technicien débranche par erreur le mauvais câble réseau. Quelle menace ?","Non intentionnelle (humaine)",[["Intentionnelle externe","Personne n’a voulu nuire, et il fait partie de l’équipe."],["Accident naturel","Ni orage ni inondation : la cause est une personne."],["Cybercriminalité","Il n’y a ni attaquant ni gain recherché."]]]],
+C:[["Quel mot anglais (8 lettres) désigne l’hameçonnage par mail ?","phishing","Il vient de « fishing » (pêche), avec « ph » au début."]]},
+{ic:"🏰",t:"Surface d’attaque et défense",
+L:[["La surface d’attaque","Ce sont toutes les <b>portes d’entrée</b> du SI, de trois types : <b>physique</b> (locaux), <b>numérique</b> (tout ce qui est ciblable en ligne) et <b>humaine</b> (ingénierie sociale). Un pirate n’a besoin que d’<u>une seule</u> faille."],
+["Les 4 étapes ANSSI","<b>1 Identifier</b> les actifs et vulnérabilités → <b>2 Évaluer</b> la criticité (EBIOS) → <b>3 Réduire</b> la surface → <b>4 Surveiller</b> et maintenir à jour."],
+["Les outils à connaître","<b>NMAP</b> (scan de ports), antivirus, <b>EDR</b>, pare-feu (pfSense), <b>IDS</b> (Snort) et <b>IPS</b> (Suricata), <b>CMDB</b> (GLPI), scans de vulnérabilités (OpenVAS). Surveillance : Nagios, Zabbix, Centreon."],
+["Réduire la surface","Segmenter le réseau, installer les mises à jour, supprimer ce qui ne sert plus, VPN ou authentification pour les services, <b>moindre privilège</b> (chacun n’a que les droits utiles), sensibiliser les collaborateurs."],
+["PCA, PRA, logs, audit","<b>PCA</b> : continuer l’activité en cas d’incident (sauvegardes). <b>PRA</b> : reprendre après un sinistre majeur (site de secours). Les <b>logs</b> assurent la traçabilité ; l’<b>audit</b> évalue les procédures (feuilles FRAP)."]],
+M:[["Surface humaine","Ingénierie sociale, chantage"],["Surface physique","Locaux et intrusions sur site"],["Moindre privilège","Chacun n’a que les droits strictement nécessaires"],["PCA","Poursuivre l’activité lors d’un incident, grâce aux sauvegardes"],["PRA","Reprendre l’activité après un sinistre majeur, via un site de secours"]],
+Q:[["Quel est l’ordre des 4 étapes pour maîtriser sa surface d’attaque ?","Identifier → Évaluer → Réduire → Surveiller",[["Réduire → Identifier → Surveiller → Évaluer","On ne peut pas réduire ce qu’on n’a pas encore listé."],["Surveiller → Identifier → Réduire → Évaluer","La surveillance vient à la fin, une fois la surface cartographiée."],["Évaluer → Réduire → Identifier → Surveiller","On évalue des actifs déjà identifiés : l’identification passe avant."]]],
+["Un incendie détruit la salle serveurs ; l’entreprise bascule sur un site de secours. C’est…","Un PRA",[["Un PCA","Le PCA gère les incidents courants (restaurer une sauvegarde) ; ici le sinistre est majeur."],["Un audit","Un audit évalue les procédures, il ne relance pas l’activité."],["Une segmentation","Elle isole des zones du réseau ; elle ne remet rien en service."]]]],
+C:[["Quel outil (4 lettres) scanne les ports ouverts d’un réseau ?","nmap","Son nom signifie « Network Mapper » ; il commence par un n."]]},
+{ic:"🎣",t:"Identité numérique et phishing",
+L:[["Tes traces en ligne","Ton <b>identité numérique</b> = comptes, historique, géolocalisation, cookies de traçage, résultats de recherche à ton nom. Réglages utiles : refuser la géolocalisation, l’historique et les pubs ciblées."],
+["Les outils du TP1","<b>haveibeenpwned</b> : ton mail est-il dans une fuite ? <b>Lightbeam</b> : visualise les sites qui te pistent. <b>Whois</b> : propriétaire d’un domaine. <b>Alerte Google</b> et <b>flux RSS</b> (feedly) : veille numérique."],
+["Le phishing (hameçonnage)","Une attaque d’<b>ingénierie sociale</b> : on exploite la <u>faille humaine</u>, pas une faille informatique. Faux mail de banque → lien → faux site copie conforme → tu saisis tes identifiants."],
+["Les indices d’un faux mail","Adresse ou lien légèrement différent (mamessageri.com), fautes, <b>urgence</b>, demande de données confidentielles, pas de <b>https</b> ni de cadenas, pièce jointe inattendue."],
+["La fraude au PDG","Des escrocs usurpent l’adresse du PDG (<b>mail spoofing</b>) et demandent des virements à la responsable financière. Réflexe : <b>vérifier par un autre canal</b> (téléphone)."]],
+M:[["Phishing","Faux mail qui pousse à saisir ses données sur un faux site"],["Ingénierie sociale","Exploiter la faille humaine plutôt qu’une faille technique"],["Mail spoofing","Usurper l’adresse d’un expéditeur, par exemple le PDG"],["haveibeenpwned","Indique si ton mail apparaît dans des fuites de données"],["Lightbeam","Montre le graphe des sites tiers qui te suivent"]],
+Q:[["Mail « URGENT » de ta banque avec un lien vers ma-banqu3-secure.com. Que fais-tu ?","Je n’ouvre pas le lien et je tape l’adresse officielle de ma banque",[["Je clique pour vérifier","Cliquer peut déjà ouvrir une page piégée."],["Je réponds au mail pour demander","Tu confirmes que ton adresse est active, et le faux expéditeur te répondra."],["Je change mon mot de passe via le lien","Le lien est justement le piège : tu donnerais ton mot de passe aux pirates."]]],
+["Le « PDG » demande par mail un virement urgent. Que fais-tu ?","Je vérifie par téléphone auprès du vrai PDG",[["Je vire : c’est le PDG","L’adresse peut être usurpée (spoofing)."],["Je réponds au même mail","Ce serait le faux expéditeur qui te répondrait."],["Je transfère à tout le service","Tu ne vérifies rien et tu diffuses le piège."]]]],
+C:[["Quel préfixe d’URL (5 lettres) indique une connexion chiffrée, avec cadenas ?","https","C’est « http » suivi d’une lettre qui veut dire « secure »."]]},
+{ic:"🦠",t:"Malwares et contre-mesures",
+L:[["La ménagerie des malwares","<b>Virus</b> : s’attache à un fichier, besoin d’une action humaine. <b>Ver</b> : se propage seul par le réseau. <b>Cheval de Troie</b> : semble légitime. <b>Ransomware</b> : chiffre et réclame une rançon. <b>Spyware</b> : espionne."],
+["Les autres","<b>Rootkit</b> : se cache et donne des droits élevés. <b>Botnet</b> : machines contrôlées à distance (DDoS). <b>Adware</b> : pubs intrusives. <b>Cryptojacker</b> : mine de la cryptomonnaie à ton insu. <b>Scareware</b> : fausses alertes pour te faire payer."],
+["Les 5 phases d’une attaque","<b>Infection</b> (pièce jointe, USB, faille) → <b>Persistance</b> (reste après redémarrage) → <b>Dissimulation</b> / élévation de privilèges → <b>Propagation</b> (réseau) → <b>Exfiltration</b> / action finale (serveur C2)."],
+["Les outils d’analyse","<b>VirusTotal</b> : analyse un fichier, un hash ou une URL. <b>MITRE ATT&amp;CK</b> : techniques des attaquants. <b>Sandbox</b> : exécution isolée pour observer. <b>IOC</b> : indices de compromission. <b>Forensic</b> : conserver les preuves."],
+["Réagir","Le <b>CERT-FR</b> (rattaché à l’ANSSI) publie alertes et recommandations. Le <b>patch</b> corrige la faille. Bonne pratique : travailler en <b>session standard</b>, pas admin, pour limiter les dégâts d’un malware."]],
+M:[["Ver","Se propage tout seul par le réseau, sans action humaine"],["Cheval de Troie","Semble légitime mais cache une charge malveillante"],["Sandbox","Environnement isolé pour observer un fichier suspect"],["VirusTotal","Analyse un fichier, un hash ou une URL avec plusieurs antivirus"],["IOC","Indice observable prouvant qu’un système est compromis"]],
+Q:[["Un malware chiffre tes fichiers et réclame un paiement. C’est un…","Ransomware",[["Spyware","Il espionne en silence : il ne bloque rien."],["Adware","Il affiche des publicités, il ne chiffre pas tes fichiers."],["Rootkit","Il sert à se cacher et à obtenir des droits, pas à demander une rançon."]]],
+["Dans quel ordre agit un malware ?","Infection → Persistance → Dissimulation → Propagation → Exfiltration",[["Persistance → Infection → Dissimulation → Propagation → Exfiltration","Il doit d’abord entrer sur la machine avant de pouvoir y rester."],["Infection → Exfiltration → Persistance → Dissimulation → Propagation","Le but final (vol, rançon) arrive en dernier."],["Propagation → Infection → Persistance → Dissimulation → Exfiltration","Il infecte une première machine avant de se propager."]]]],
+C:[["Quelle commande Linux affiche la version du noyau (kernel) ?","uname -r","Le nom vient de « unix name », suivi de l’option r (release)."]]},
+{ic:"🔑",t:"Mots de passe",
+L:[["Prouver qui tu es","Authentification par <b>possession</b> (badge, clé), <b>biométrie</b> (empreinte) ou <b>connaissance</b> (mot de passe). L’identifiant dit qui tu prétends être ; l’authentification le prouve."],
+["Le hash, une empreinte","Un site stocke le <b>hash</b> de ton mot de passe, pas le mot de passe. Changer une seule lettre change tout le hash. Un pirate vole le hash puis essaie de retrouver le mot de passe."],
+["Comment on casse un mot de passe","<b>Force brute</b> (tout tester), <b>dictionnaire</b> (mots courants), <b>permutation</b> (123, a→@ sont connus), <b>ingénierie sociale</b> (infos perso trouvées en ligne), <b>phishing</b> et <b>réutilisation</b> du même mot de passe."],
+["La force : N<sup>L</sup>","<b>N</b> = nombre de caractères possibles, <b>L</b> = longueur. Un PIN à 4 chiffres : 10<sup>4</sup> = 10 000 essais. La <b>longueur</b> pèse le plus. Bon réflexe : phrase de passe longue, unique par site, gestionnaire de mots de passe, double authentification."],
+["Le TP Linux","<b>/etc/passwd</b> : comptes. <b>/etc/shadow</b> : hash (lisible par root). <b>unshadow</b> les fusionne, <b>John the Ripper</b> les attaque par dictionnaire, <b>john --show</b> affiche les résultats. Une <b>CVE</b> est l’identifiant d’une faille connue. Intrusion illégale : art. 323-1, 2 ans et 60 000 €."]],
+M:[["Force brute","Tester toutes les combinaisons possibles"],["Dictionnaire","Tester des mots courants et leurs variantes"],["Ingénierie sociale","Deviner à partir d’informations personnelles"],["/etc/shadow","Fichier Linux qui contient les hash des mots de passe"],["CVE","Identifiant public d’une vulnérabilité connue"]],
+Q:[["Quel mot de passe est le plus solide ?","Une phrase aléatoire de 5 mots, longue",[["P@ssw0rd!","Ces substitutions (a→@, o→0) sont dans tous les dictionnaires."],["Caro1985","Prénom + année : trouvable par ingénierie sociale."],["MotDePasse123","Des mots courants + 123 : dictionnaire et permutation le cassent vite."]]],
+["Même mot de passe sur un forum amateur et sur ta banque. Quel risque ?","Si le forum est piraté, ta banque est exposée",[["Aucun, le hash protège","Un hash faible se casse, et le pirate teste ensuite ce mot de passe ailleurs."],["Seulement perdre l’accès au forum","Les pirates visent justement les sites rentables avec les mots de passe volés."],["Le risque est de l’oublier","Le vrai danger est la sécurité, pas la mémoire."]]]],
+C:[["Un code PIN a 4 chiffres, donc N = 10 et L = 4. Combien de combinaisons (N<sup>L</sup>) ?","10000|10 000","Multiplie 10 par lui-même 4 fois."],["Quelle commande fusionne les fichiers passwd et shadow en un seul ?","(/usr/sbin/)?unshadow( .*)?","Son nom dit ce qu’elle fait : elle retire l’« ombre » (shadow)."]]}
+];
+const $=q=>document.querySelector(q),A=$("#a"),sh=a=>[...a].sort(()=>Math.random()-.5),K="egnora-v1";
+let P={d:[],s:{}};try{P=JSON.parse(localStorage.getItem(K))||P}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(P))}catch(e){}};
+let V={v:"home"};const t0=Date.now();
+setInterval(()=>{const s=Math.floor((Date.now()-t0)/1e3),f=n=>String(n).padStart(2,"0");$("#tm").textContent="⏱ "+f(Math.floor(s/60))+":"+f(s%60)+" / 60:00"},1e3);
+const go=l=>{V={v:"play",l,st:0,i:0,e:0};R()};
+const nx=()=>{V.st++;V.i=0;V.m=null;V.o=null;V.msg=""};
+function R(){const p=Math.round(P.d.length/D.length*100);$("#bar").style.width=p+"%";$("#pc").textContent=p+"%";scrollTo(0,0);
+if(V.v=="home")return H();if(V.v=="end")return F();if(V.v=="lv")return W();
+const d=D[V.l],h=`<div class="st">${["Leçon","Mémoire","QCM","Code"].map((s,i)=>`<span class="${i==V.st?"on":i<V.st?"ok":""}">${s}</span>`).join("")}</div><h2>${d.ic} ${d.t}</h2>`;
+[Les,Mem,Qcm,Cod][V.st](d,h)}
+function H(){A.innerHTML=`<div class="card"><h2>Bienvenue, nouvel administrateur 👋</h2><p>L’entreprise <b>Egnora</b> est attaquée. Ta mission : comprendre comment protéger son système d’information, <b>en 1 heure</b>, même si tu pars de zéro.</p><p>Chaque niveau (≈10 min) : <b>Leçon</b> → <b>Mémoire</b> → <b>QCM</b> → <b>Code</b>.</p><p>Si tu te trompes, je t’explique ton erreur, mais je ne donne pas la solution : tu recommences. C’est comme ça qu’on retient.</p></div>`+D.map((d,i)=>{const o=i==0||P.d.includes(i-1)||P.d.includes(i);return`<button class="t lv" ${o?"":"disabled"} onclick="go(${i})"><span style="font-size:28px">${P.d.includes(i)?"✅":o?d.ic:"🔒"}</span><b>Niveau ${i+1} · ${d.t}</b><span>${"⭐".repeat(P.s[i]||0)}</span></button>`}).join("")+`<p class="m"><a href="#" onclick="if(confirm('Tout effacer ?')){P={d:[],s:{}};save();V={v:'home'};R()}return false" style="color:inherit">Tout recommencer</a></p>`}
+function Les(d,h){const c=d.L[V.i],l=V.i==d.L.length-1;A.innerHTML=h+`<div class="card"><h3>${c[0]}</h3><p>${c[1]}</p></div><div class="nav">${V.i?`<button class="g" onclick="V.i--;R()">Retour</button>`:`<button class="g" onclick="V={v:'home'};R()">Menu</button>`}<button onclick="${l?"nx()":"V.i++"};R()">${l?"À toi de jouer !":"Suivant"}</button></div><p class="m">Carte ${V.i+1}/${d.L.length}</p>`}
+function Mem(d,h){if(!V.m)V.m={o:sh(d.M.map((_,i)=>i)),s:null,k:[],msg:""};const m=V.m,b=(i,f,c)=>`<button class="t ${m.k.includes(i)?"ok":c}" ${m.k.includes(i)?"disabled":""} onclick="${f}(${i})">${f=="ms"?d.M[i][0]:d.M[i][1]}</button>`;
+A.innerHTML=h+`<p>Associe chaque terme à sa définition : touche un terme, puis sa définition.</p><div class="mm"><div>${d.M.map((_,i)=>b(i,"ms",m.s===i?"sel":"")).join("")}</div><div>${m.o.map(i=>b(i,"md","")).join("")}</div></div>${m.msg}`}
+const ms=i=>{V.m.s=i;V.m.msg="";R()};
+function md(j){const m=V.m,d=D[V.l];if(m.s===null){m.msg=`<p class="ko">Choisis d’abord un terme à gauche.</p>`;return R()}
+if(m.s==j){m.k.push(j);m.s=null;m.msg=`<p class="yes">✅ Bien joué !</p>`;if(m.k.length==d.M.length)nx()}
+else{V.e++;m.msg=`<p class="ko">❌ Erreur : cette définition ne correspond pas à « ${d.M[m.s][0]} ». Repense à ce que fait vraiment ce terme, puis réessaie.</p>`;m.s=null}R()}
+function Qcm(d,h){const q=d.Q[V.i];if(!V.o)V.o=sh([[q[1]],...q[2]]);
+A.innerHTML=h+`<div class="card"><h3>Question ${V.i+1}/${d.Q.length}</h3><p>${q[0]}</p></div>${V.msg||""}${V.o.map((o,k)=>`<button class="t" onclick="qa(${k})">${o[0]}</button>`).join("")}`}
+function qa(k){const o=V.o[k],d=D[V.l];if(o[1]){V.e++;V.msg=`<p class="ko">❌ ${o[1]} Réessaie.</p>`;V.o=sh(V.o)}
+else{V.o=null;V.msg=`<p class="yes">✅ Juste ! Question suivante.</p>`;if(V.i<d.Q.length-1)V.i++;else nx()}R()}
+function Cod(d,h){const c=d.C[V.i];A.innerHTML=h+`<div class="card"><h3>Code ${V.i+1}/${d.C.length}</h3><p>${c[0]}</p><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" onkeydown="event.key=='Enter'&&ck()"></div>${V.msg||""}<button onclick="ck()">Valider</button>`;$("#in").focus()}
+function ck(){const d=D[V.l],c=d.C[V.i],v=$("#in").value.trim().toLowerCase().replace(/\s+/g," ");
+if(new RegExp("^("+c[1]+")$").test(v)){V.msg="";if(V.i<d.C.length-1)V.i++;else return fin()}else{V.e++;V.msg=`<p class="ko">❌ ${c[2]} Réessaie.</p>`}R()}
+function fin(){V.s=V.e==0?3:V.e<4?2:1;if(!P.d.includes(V.l))P.d.push(V.l);P.s[V.l]=Math.max(P.s[V.l]||0,V.s);save();V.v="lv";R()}
+function W(){const d=D[V.l],last=V.l==D.length-1;A.innerHTML=`<div class="card" style="text-align:center"><h2>🎉 Niveau réussi !</h2><p style="font-size:30px;margin:0">${"⭐".repeat(V.s)}</p><p>${V.e?V.e+" erreur(s) : tu as appris en te trompant, c’est le but.":"Sans aucune erreur, bravo !"}</p><p>Tu maîtrises : <b>${d.t}</b></p></div><div class="nav"><button class="g" onclick="V={v:'home'};R()">Menu</button><button onclick="${last?"V={v:'end'};R()":"go("+(V.l+1)+")"}">${last?"Terminer la mission":"Niveau suivant"}</button></div>`}
+function F(){A.innerHTML=`<div class="card"><h2>🏆 Mission accomplie !</h2><p>Le bouclier du SI est à 100 %. Fiche à relire avant le contrôle :</p><ul><li><b>DICP</b> : Disponibilité, Intégrité, Confidentialité, Preuve.</li><li><b>Risque</b> = Menace × Vulnérabilité × Impact ÷ Contre-mesures.</li><li><b>Sûreté</b> = accident ; <b>sécurité</b> = malveillance.</li><li><b>4 menaces</b> : déstabilisation, espionnage, sabotage, cybercriminalité.</li><li><b>4 étapes</b> : identifier, évaluer (EBIOS), réduire, surveiller.</li><li><b>PCA</b> = continuer ; <b>PRA</b> = reprendre après sinistre.</li><li><b>5 phases d’un malware</b> : infection, persistance, dissimulation, propagation, exfiltration.</li><li><b>Mot de passe</b> : force = N<sup>L</sup>, long, unique, double authentification.</li></ul></div><button onclick="V={v:'home'};R()">Retour au menu</button>`}
+R();
+</script></body></html>
